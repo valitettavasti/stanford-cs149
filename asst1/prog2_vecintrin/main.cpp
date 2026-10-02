@@ -252,7 +252,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
   __cs149_vec_float x;
   __cs149_vec_int y;
   __cs149_vec_float result;
-   __cs149_vec_int count;
+  __cs149_vec_int count;
   __cs149_vec_int zero = _cs149_vset_int(0);
   __cs149_vec_float one = _cs149_vset_float(1.f);
   __cs149_vec_int one_int = _cs149_vset_int(1);
@@ -272,7 +272,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
     _cs149_vstore_float(output+i, one, maskIsZero);         //output[i] = 1.f;
     maskIsNotZero=_cs149_mask_not(maskIsZero);              //} else {
     maskIsNotZero=_cs149_mask_and(maskIsNotZero, maskAll);  //取反后后面还需要和尾部有效mask取&
-    _cs149_vload_float(result, values+i, maskIsNotZero);    // float result = x;
+    _cs149_vmove_float(result, x, maskIsNotZero);           // float result = x;
     _cs149_vsub_int(count,y,one_int,maskIsNotZero);         //int count = y - 1;
     maskIsVaild = _cs149_init_ones(0);
     _cs149_vgt_int(maskIsVaild, count, zero, maskIsNotZero);
@@ -306,11 +306,20 @@ float arraySumVector(float* values, int N) {
   //
   // CS149 STUDENTS TODO: Implement your vectorized version of arraySumSerial here
   //
-  
+  __cs149_vec_float sum_array = _cs149_vset_float(0.f);
+  __cs149_vec_float x;
+  __cs149_mask maskAll, maskSum;
+  maskAll = _cs149_init_ones();
+  maskSum = _cs149_init_ones();
   for (int i=0; i<N; i+=VECTOR_WIDTH) {
-
+    _cs149_vload_float(x, values+i, maskAll);
+    _cs149_vadd_float(sum_array, sum_array, x, maskAll);
+  }  //O(N/VECTOR_WIDTH)
+  for (int i=0; i<log2(VECTOR_WIDTH); i++){
+    _cs149_hadd_float(sum_array, sum_array);
+    _cs149_interleave_float(sum_array, sum_array);
   }
-
-  return 0.0;
+  float lanes[VECTOR_WIDTH];
+  _cs149_vstore_float(lanes,sum_array, maskAll);
+  return lanes[0];
 }
-

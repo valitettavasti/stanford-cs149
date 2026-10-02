@@ -4,3 +4,5 @@ objs/
 asst1/prog1_mandelbrot_threads/mandelbrot
 asst1/prog2_vecintrin/myexp
 asst3/saxpy/cudaSaxpy
+asst2/part_a/runtasks
+asst2/part_b/runtasks
